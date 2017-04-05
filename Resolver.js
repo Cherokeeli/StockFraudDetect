@@ -1,7 +1,7 @@
 var fs = require('fs');
 var stringify = require('csv-stringify');
 
-var t_result = fs.readFileSync('../NetCracker/data/result.json'); //read news
+var t_result = fs.readFileSync('../result.json'); //read news
 var t_dict = fs.readFileSync('./dic.json'); //read words dictionary
 var t_stocks = fs.readFileSync('./stocks.json'); //read reference stock data
 var result = JSON.parse(t_result);
@@ -30,20 +30,20 @@ Date.prototype.diff = function (date) {
 
 function stockPriceFromData(sid, time, offset) {
     var x_offset = stocks[0].indexOf(sid), price;
-    console.log(sid, x_offset);
-    var origin_date = new Date('2016/03/15');
+    //console.log(sid, x_offset);
+    var origin_date = new Date('2016-03-15');
     time = new Date(time);
     var y_offset = 5 * Math.floor(time.diff(origin_date)) / 7;
-    console.log('x: '+Math.floor(y_offset + offset - 12));
+    //console.log('x: '+Math.floor(y_offset + offset - 12));
 
-    if ((y_offset + offset - 12)<249) {
-    console.log('finding: '+stocks[Math.floor(y_offset + offset - 12)][0]);
-        price = stocks[Math.floor(y_offset + offset - 12)][x_offset];
+    if ((y_offset + offset - 12)<=249 && stocks[Math.floor(y_offset + offset - 13)][x_offset]) {
+    //console.log('finding: '+stocks[Math.floor(y_offset + offset - 13)][0]);
+        price = stocks[Math.floor(y_offset + offset - 13)][x_offset];
     }
     else
-        price = '';
+        price = 0;
     //console.log('price: '+price+'y: '+Math.floor(y_offset + offset-10));
-    return price ? price : 0; //return stock price
+    return parseFloat(price); //return stock price
 }
 
 function rateOfRecommand(up, down) {
@@ -57,7 +57,7 @@ function zeroPadding(num, n) { //add prefix zero with total n
 var re = /([^\u3002]*[\uff08]\d+[\uff09][^\u3002]*)[\u3002]/g; //根据股票号码所在的句子进行断句
 var pe = /[\uff08]\d+[\uff09]/g;
 var extract_result = [];
-for (var i = 0; i < result.length; i++) { // number of news loop
+for (var i = 0; i < result.length-1; i++) { // number of news loop
 
     var matchs, sentences = [], submatch, recom_listrate = [], sentence_rate = [];
     var increase_num = 0, total_len; //count for increase stocks
@@ -69,6 +69,12 @@ for (var i = 0; i < result.length; i++) { // number of news loop
         result[i].drop = 0;
         continue; // if no stock id; continue loop
     }
+    var ori_date = new Date('2017-03-15');
+    var now_date = new Date(result[i].time);
+    //console.log("ori:%s, now:%s",ori_date,now_date)
+    if (now_date.getTime() == ori_date.getTime())
+        continue;
+
     total_len = result[i].content.match(pe).length;
     while (matchs != null) { //match the substring
         var count = (matchs[0].match(pe)).length; //have many id in the same substring
@@ -104,9 +110,12 @@ for (var i = 0; i < result.length; i++) { // number of news loop
         for (var n = 0; n < ids.length; n++) { // 
             var t1 = stockPriceFromData(ids[n], result[i].time, offset_from)//time t1
             var t2 = stockPriceFromData(ids[n], result[i].time, offset_to);//t+1
-            //console.log("t1t2:"+t1+' '+t2);
+            
+            var inc_ratio = t1==0? 0: (t2 - t1) / t1;
+            if (inc_ratio==-1)
+            console.log("t1:%s, t2:%s, inc:%s, id:%s, date:%s",t1,t2,inc_ratio,ids[n],time);
             //result[i].increase_rate = (t2 - t1) / t1;
-            if ((t2 - t1) / t1 >= increase_rate) { //calculate premium rate
+            if (inc_ratio >= increase_rate) { //calculate premium rate
                 increase_num++;
             }
             var element = {
@@ -115,7 +124,8 @@ for (var i = 0; i < result.length; i++) { // number of news loop
                 'time': result[i].time,
                 'rise': numOfUp,
                 'drop': numOfDown,
-                'increase_rate': ((t2 - t1) / t1)
+                'increase_rate': inc_ratio,
+                'author':result[i].author
             }
             extract_result.push(element);
         }// for ids
