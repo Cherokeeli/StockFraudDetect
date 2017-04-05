@@ -1,0 +1,23 @@
+{
+  "name": "stockfrauddetect",
+  "version": "1.0.0",
+  "description": "",
+  "main": "Resolver.js",
+  "dependencies": {
+    "csv": "^1.1.1"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Cherokeeli/StockFraudDetect.git"
+  },
+  "author": "Cherokeeli",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Cherokeeli/StockFraudDetect/issues"
+  },
+  "homepage": "https://github.com/Cherokeeli/StockFraudDetect#readme"
+}
