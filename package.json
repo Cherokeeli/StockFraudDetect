@@ -1,7 +1,7 @@
 {
   "name": "stockfrauddetect",
   "version": "1.0.0",
-  "description": "",
+  "description": "Use to formatter the stocks news",
   "main": "Resolver.js",
   "dependencies": {
     "JSONStream": "^1.3.1",
