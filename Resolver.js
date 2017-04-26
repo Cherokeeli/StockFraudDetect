@@ -8,6 +8,7 @@ var t_volume =fs.readFileSync('./data/stocks_volume.json');
 //var result = JSON.parse(t_result);
 var dict = JSON.parse(t_dict); //convert to json
 var stocks = JSON.parse(t_stocks);
+var volume = JSON.parse(t_volume);
 
 const possibility = 0; // for word evaluation
 const increase_rate = 0.07; // for price premium rate
@@ -44,7 +45,7 @@ Date.prototype.diff = function (date) {
     return (this.getTime() - date.getTime()) / (24 * 60 * 60 * 1000);
 }
 
-function stockPriceFromData(sid, time, offset) {
+function indexDataFromJson(sid, time, offset, stocks) {
     console.log("offset"+offset);
     var x_offset = stocks[0].indexOf(sid),price=0;
     offset = offset*(24*60*60*1000);
@@ -76,6 +77,7 @@ function stockPriceFromData(sid, time, offset) {
     //console.log('price: '+price+'y: '+Math.floor(y_offset + offset-10));
     //return parseFloat(price); //return stock price
 }
+
 
 function rateOfRecommand(up, down) {
     return up / (up + down);
@@ -134,7 +136,7 @@ function resolveSentence(result, callback) {
         }) //get id of stocks
         //console.log(ids);
         sentence_rate.push(rate);
-        var time = new Date(result.time), offset_from, offset_to, offset_to2, offset_to3, offset_to4, offset_to5;
+        var time = new Date(result.time), offset_from, offset_to, offset_to2, offset_to3, offset_to4, offset_to5, offset_start, offset_end, offset_end2, offset_end3, offset_end4, offset_end5;
         console.log("time "+time.getDay());
         if (time.getDay() == 6) {
             offset_from = -1;
@@ -143,6 +145,12 @@ function resolveSentence(result, callback) {
             offset_to3 = 4;
             offset_to4 = 5;
             offset_to5 = 6;
+            offset_start = 2;
+            offset_end = -1;
+            offset_end2 = -2;
+            offset_end3 = -3;
+            offset_end4 = -4;
+            offset_end5 = -5;
         } else if (time.getDay() == 0) {
             offset_from = -2;
             offset_to = 1;
@@ -150,6 +158,12 @@ function resolveSentence(result, callback) {
             offset_to3 = 3;
             offset_to4 = 4;
             offset_to5 = 5;
+            offset_start = 1;
+            offset_end = -2;
+            offset_end2 = -3;
+            offset_end3 = -4;
+            offset_end4 = -5;
+            offset_end5 = -6;
         } else if (time.getDay() == 5) {
             offset_from= 0;
             offset_to = 3;
@@ -157,6 +171,12 @@ function resolveSentence(result, callback) {
             offset_to3 = 5;
             offset_to4 = 6;
             offset_to5 = 7;
+            offset_start = 0;
+            offset_end = -1;
+            offset_end2 = -2;
+            offset_end3 = -3;
+            offset_end4 = -4;
+            offset_end5 = -7;
         } else if (time.getDay() == 1) {
             offset_from= 0;
             offset_to = 1;
@@ -164,6 +184,12 @@ function resolveSentence(result, callback) {
             offset_to3 = 3;
             offset_to4 = 4;
             offset_to5 = 7;
+            offset_start = 0;
+            offset_end = -3;
+            offset_end2 = -4;
+            offset_end3 = -5;
+            offset_end4 = -6;
+            offset_end5 = -7;
         } else if (time.getDay() == 2) {
             offset_from= 0;
             offset_to = 1;
@@ -171,6 +197,12 @@ function resolveSentence(result, callback) {
             offset_to3 = 3;
             offset_to4 = 6;
             offset_to5 = 7;
+            offset_start = 0;
+            offset_end = -1;
+            offset_end2 = -4;
+            offset_end3 = -5;
+            offset_end4 = -6;
+            offset_end5 = -7;
         } else if (time.getDay()==3) {
             offset_from= 0;
             offset_to = 1;
@@ -178,6 +210,12 @@ function resolveSentence(result, callback) {
             offset_to3 = 5;
             offset_to4 = 6;
             offset_to5 = 7;
+            offset_start = 0;
+            offset_end = -1;
+            offset_end2 = -2;
+            offset_end3 = -5;
+            offset_end4 = -6;
+            offset_end5 = -7;
         } else if (time.getDay()==4) {
             offset_from= 0;
             offset_to = 1;
@@ -185,22 +223,35 @@ function resolveSentence(result, callback) {
             offset_to3 = 5;
             offset_to4 = 6;
             offset_to5 = 7;
+            offset_start = 0;
+            offset_end = -1;
+            offset_end2 = -2;
+            offset_end3 = -3;
+            offset_end4 = -6;
+            offset_end5 = -7;
         }
         //if (rate > possibility) { //word evaluation possibili ty
         for (var n = 0; n < ids.length; n++) { // 
             console.log('idsn',ids[n]);
-            var t1 = stockPriceFromData(ids[n], result.time, offset_from)//time t1
-            var t2 = stockPriceFromData(ids[n], result.time, offset_to);//t+1
-            var t3 = stockPriceFromData(ids[n], result.time, offset_to2);//t+2
-            var t4 = stockPriceFromData(ids[n], result.time, offset_to3);//t+3
-            var t5 = stockPriceFromData(ids[n], result.time, offset_to4);//t+4
-            var t6 = stockPriceFromData(ids[n], result.time, offset_to5);//t+5
+            var t1 = indexDataFromJson(ids[n], result.time, offset_from, stocks)//time t1 // stocks
+            var t2 = indexDataFromJson(ids[n], result.time, offset_to, stocks);//t+1
+            var t3 = indexDataFromJson(ids[n], result.time, offset_to2, stocks);//t+2
+            var t4 = indexDataFromJson(ids[n], result.time, offset_to3, stocks);//t+3
+            var t5 = indexDataFromJson(ids[n], result.time, offset_to4, stocks);//t+4
+            var t6 = indexDataFromJson(ids[n], result.time, offset_to5, stocks);//t+5
 
-            var inc_ratio = t1 == 0 ? 0 : (t2 - t1) / t1;
-            var inc_ratio2 = t1 == 0 ? 0 : (t3 - t1) / t1;
-            var inc_ratio3 = t1 == 0 ? 0 : (t4 - t1) / t1;
-            var inc_ratio4 = t1 == 0 ? 0 : (t5 - t1) / t1;
-            var inc_ratio5 = t1 == 0 ? 0 : (t6 - t1) / t1;
+            var v1 = indexDataFromJson(ids[n], result.time, offset_start, volume)//time t1 // stocks
+            var v2 = indexDataFromJson(ids[n], result.time, offset_end, volume);//t+1
+            var v3 = indexDataFromJson(ids[n], result.time, offset_end2, volume);//t+2
+            var v4 = indexDataFromJson(ids[n], result.time, offset_end3, volume);//t+3
+            var v5 = indexDataFromJson(ids[n], result.time, offset_end4, volume);//t+4
+            var v6 = indexDataFromJson(ids[n], result.time, offset_end5, volume);//t+5
+
+            var inc_ratio = isNaN((t2 - t1) / t1) ? '' : (t2 - t1) / t1;
+            var inc_ratio2 = isNaN((t3 - t1) / t1) ? '' : (t3 - t1) / t1;
+            var inc_ratio3 = isNaN((t4 - t1) / t1) ? '' : (t4 - t1) / t1;
+            var inc_ratio4 = isNaN((t5 - t1) / t1) ? '' : (t5 - t1) / t1;
+            var inc_ratio5 = isNaN((t6 - t1) / t1) ? '' : (t6 - t1) / t1;
             if (inc_ratio == -1)
                 console.log("t1:%s, t2:%s, inc:%s, id:%s, date:%s", t1, t2, inc_ratio, ids[n], time);
             //result[i].increase_rate = (t2 - t1) / t1;
@@ -225,6 +276,12 @@ function resolveSentence(result, callback) {
                 t4,
                 t5,
                 t6,
+                v1,
+                v2,
+                v3,
+                v4,
+                v5,
+                v6,
                 result.author
             ];
             //element.concat()
